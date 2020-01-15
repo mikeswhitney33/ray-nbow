@@ -2,7 +2,7 @@
 An automatic ray tracing shader using AI and algorithms.
 
 ## Getting Started:
-So far this program only has the dependency of `cmake`, which can be install with on a Mac:
+So far this program only has the dependency of `cmake`, which can be install using `brew` on a Mac:
 ```
 brew install cmake
 ```
@@ -12,4 +12,7 @@ mkdir build && cd build
 cmake .. 
 make 
 ```
-From the `build` directory, run `make test` to see a simple sphere image 
+From the `build` directory, run the following to see a simple sphere image made of the distances:
+```
+make test
+```
