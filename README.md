@@ -12,7 +12,7 @@ mkdir build && cd build
 cmake .. 
 make 
 ```
-From the `build` directory, run the following to see a simple sphere image made of the distances:
+From the `build` directory, run the following to run the tests made in the test directory:
 ```
 make test
 ```
