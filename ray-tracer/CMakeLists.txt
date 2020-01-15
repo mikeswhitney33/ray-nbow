@@ -1,0 +1,1 @@
+add_library(ray-tracer ray-tracer.hpp ray-tracer.cpp)
