@@ -43,7 +43,7 @@ mat4 Transform::mat() const
     mat4 rz = rotate(rotation.z, {0, 0, 1});
     return matmul(t, matmul(rx, matmul(ry, matmul(rz, s))));
 }
-Transform::Transform(const vec3 &t, const vec3 &r, const vec3 &s):translation(t),scaling(s), rotation(r)
+Transform::Transform(const vec3 &t, const vec3 &r, const vec3 &s):translation(t), rotation(r),scaling(s)
 {}
 
 mat4 identity()
@@ -365,7 +365,7 @@ void RayTracingScene::addObj(const std::string &filename, const Transform &t)
         size_t index_offset = 0;
         for(size_t f = 0;f < objshapes[s].mesh.num_face_vertices.size();f++)
         {
-            int fv = objshapes[s].mesh.num_face_vertices[f];
+            size_t fv = objshapes[s].mesh.num_face_vertices[f];
             vec3 verts[3];
             for(size_t v = 0;v < fv;v++)
             {
@@ -399,7 +399,7 @@ void RayTracingScene::setFov(const float &fov)
     scale = tanf(radians(fov));
 }
 
-RayTracingScene RayTracingScene::FromScene(const std::string &filename)
+RayTracingScene RayTracingScene::FromScene(const std::string &filename, const std::string &data_dir)
 {
     RayTracingScene scene;
     std::ifstream f(filename);
@@ -449,7 +449,7 @@ RayTracingScene RayTracingScene::FromScene(const std::string &filename)
             std::string path;
             vec3 t, r, s;
             f >> path >> t >> r >> s;
-            scene.addObj(path, Transform(t, r, s));
+            scene.addObj(data_dir + path, Transform(t, r, s));
         }
     }
     return scene;

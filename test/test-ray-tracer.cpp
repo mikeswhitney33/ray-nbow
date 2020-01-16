@@ -11,29 +11,19 @@ std::string data_dir = "../../test/test_data";
 
 int main(int argc, char ** argv)
 {
-    std::stringstream ss;
-    ss << "(1, 2, 3)";
-    vec3 x;
-    ss >> x;
-    std::cout << "(" << x.x << "," << x.y << "," << x.z << ")" << std::endl;
     if(argc != 2)
     {
         std::cerr << "Usage: " << argv[0] << " <outname>" << std::endl;
         return -1;
     }
-    std::cout << rotate(radians(45), {0, 1, 0}) << std::endl;
 
-    RayTracingScene scene;
-    scene.addShape(new Sphere({-0.2, 0, 0}, 0.2));
-    Transform t({0.5, 0, 0}, {0, 0, 0}, {0.5, 0.5, 0.5});
-    scene.addObj(data_dir + "/objs/cube.obj", t);
+    RayTracingScene scene = RayTracingScene::FromScene(data_dir + "/scenes/basic.scene", data_dir);
     float *pix = scene.getDistances(vec3{0, 0, -1}, {0, 0, 0}, {0, 1, 0});
     scene.savePPM("test.ppm", pix);
     delete [] pix;
-    #ifdef __APPLE__
-    system("open test.ppm");
-    #else
-    system("display test.ppm");
-    #endif // __APPLE__
-    return 0;
+#ifdef __APPLE__
+    return system("open test.ppm");
+#else
+    return system("display test.ppm");
+#endif // __APPLE__
 }

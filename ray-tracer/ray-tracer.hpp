@@ -342,7 +342,7 @@ public:
     void setHeight(const int &height);
     void setFov(const float &fov);
 
-    static RayTracingScene FromScene(const std::string &filename);
+    static RayTracingScene FromScene(const std::string &filename, const std::string &data_dir);
 private:
     int width, height;
     float w, h, fov, scale, aspect;
