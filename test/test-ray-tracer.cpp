@@ -30,6 +30,10 @@ int main(int argc, char ** argv)
     float *pix = scene.getDistances(vec3{0, 0, -1}, {0, 0, 0}, {0, 1, 0});
     scene.savePPM("test.ppm", pix);
     delete [] pix;
+    #ifdef __APPLE__
+    system("open test.ppm");
+    #else
     system("display test.ppm");
+    #endif // __APPLE__
     return 0;
 }

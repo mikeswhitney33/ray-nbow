@@ -13,20 +13,20 @@
  * -----
  * The basic 3d vector structure
  */
-struct vec3 
+typedef struct vec3
 {
     float x, y, z;
-};
+} vec3;
 
 /**
  * mat4:
  * -----
  * A basic structure representing a 4x4 matrix.
  */
-struct mat4
+typedef struct mat4
 {
     float m[4][4];
-};
+} mat4;
 
 class Transform
 {
@@ -60,7 +60,7 @@ float radians(const float &deg);
  * operator+:
  * ----------
  * performs addition between two vec3's
- * 
+ *
  * @param a: vec3 the left operand
  * @param b: vec3 the right operand
  * @return the elementwise addition of two vec3's
@@ -71,7 +71,7 @@ vec3 operator+(const vec3 &a, const vec3 &b);
  * operator-:
  * ----------
  * performs subtraction between two vec3's
- * 
+ *
  * @param a: vec3 the left operand
  * @param b: vec3 the right operand
  * @return the elementwise subtraction of two vec3's
@@ -82,7 +82,7 @@ vec3 operator-(const vec3 &a, const vec3 &b);
  * operator*:
  * ----------
  * performs multiplication between a vec3 and a float
- * 
+ *
  * @param a: vec3 the left operand
  * @param f: float the right operand
  * @return the elementwise multiplication between a vec3 and a float
@@ -93,7 +93,7 @@ vec3 operator*(const vec3 &a, const float &f);
  * operator/:
  * ----------
  * performs division between a vec3 and a float
- * 
+ *
  * @param a: vec3 the left operand
  * @param f: float the right operand
  * @return the elementwise division between a vec3 and a float
@@ -104,7 +104,7 @@ vec3 operator/(const vec3 &a, const float &f);
  * dot:
  * ----
  * performs the dot product between two vec3's
- * 
+ *
  * @param a: vec3 the left operand
  * @param b: vec3 the right operand
  * @return the dot product between a and b.
@@ -115,7 +115,7 @@ float dot(const vec3 &a, const vec3 &b);
  * cross:
  * ----
  * performs the cross product between two vec3's
- * 
+ *
  * @param a: vec3 the left operand
  * @param b: vec3 the right operand
  * @return the cross product between a and b.
@@ -126,7 +126,7 @@ vec3 cross(const vec3 &a, const vec3 &b);
  * norm:
  * -----
  * normalizes a given vec3
- * 
+ *
  * @param a: vec3 the given vec3
  * @return: the normalized version of a
  */
@@ -144,7 +144,7 @@ public:
      * Ray:
      * ----
      * constructs a new Ray.
-     * 
+     *
      * @param o: vec3 the origin of the ray.
      * @param d: vec3 the direction of the ray.
      */
@@ -179,7 +179,7 @@ public:
      * intersect:
      * ----------
      * performs an intersection test between the shape and a ray.
-     * 
+     *
      * @param ray: Ray the incoming ray.
      * @param t: float the distance from the ray origin to the intersection point.
      * @return true if hit, false otherwise.
@@ -195,14 +195,14 @@ public:
 class Triangle: public Shape
 {
 public:
-    /** 
+    /**
      * Triangle:
      * ---------
      * constructs a new triangle given the vertices.
-     * 
+     *
      * @param a: vec3 the first vertex.
      * @param b: vec3 the second vertex.
-     * @param c: vec3 the third vertex. 
+     * @param c: vec3 the third vertex.
      */
     Triangle(const vec3 &a, const vec3 &b, const vec3 &c);
 
@@ -210,7 +210,7 @@ public:
      * intersect:
      * ----------
      * performs an intersection test between the shape and a ray.
-     * 
+     *
      * @param ray: Ray the incoming ray.
      * @param t: float the distance from the ray origin to the intersection point.
      * @return true if hit, false otherwise.
@@ -232,7 +232,7 @@ public:
      * Sphere:
      * -------
      * constructs a new sphere given a center and radius.
-     * 
+     *
      * @param c: vec3 the center of the sphere.
      * @param r: float the radius of the sphere.
      */
@@ -242,7 +242,7 @@ public:
      * intersect:
      * ----------
      * performs an intersection test between the shape and a ray.
-     * 
+     *
      * @param ray: Ray the incoming ray.
      * @param t: float the distance from the ray origin to the intersection point.
      * @return true if hit, false otherwise.
@@ -268,7 +268,7 @@ public:
     static constexpr vec3 DEFAULT_EYE = {0, 0, -1};
     static constexpr vec3 DEFAULT_CENTER = {0, 0, 0};
     static constexpr vec3 DEFAULT_UP = {0, 1, 0};
-    /** 
+    /**
      * RayTracingScene:
      * ----------------
      * constructs a scene using default values.
@@ -279,7 +279,7 @@ public:
      * RayTracingScene:
      * ----------------
      * constructs a scene with user provided values.
-     * 
+     *
      * @param width: int the width of the scene.
      * @param height: int the height of the scene.
      * @param fov: float the field of view for the scene.
@@ -290,7 +290,7 @@ public:
      * getDistances:
      * -------------
      * retrieve the distances from a camera to the scene geometry.
-     * 
+     *
      * @param eye: vec3 the position of the camera.
      * @param center: vec3 the position the camera is looking at.
      * @param up: vec3 a general up vector for the camera.
@@ -303,7 +303,7 @@ public:
      * getDistances:
      * -------------
      * retrieve the distances from a camera to the scene geometry.
-     * 
+     *
      * @param camera: mat4 the camera matrix
      * @return the distances from camera to scene geometry.
      * NOTE: the values from this function are dynamically allocated and need to be cleaned up by the caller.
@@ -311,12 +311,12 @@ public:
     float *getDistances(const mat4 &camera) const;
 
     /**
-     * savePPM: 
+     * savePPM:
      * --------
      * saves the distances to a ppm file for visualization.
-     * 
+     *
      * @param filename: string the name of the output file.
-     * @param pix: float* the distances to save 
+     * @param pix: float* the distances to save
      */
     void savePPM(const std::string &filename, float *pix) const;
 
@@ -324,7 +324,7 @@ public:
      * addShape:
      * ---------
      * adds a shape to the scene.
-     * 
+     *
      * @param s: Shape* the shape to add
      */
     void addShape(Shape *s);
@@ -333,7 +333,7 @@ public:
      * addObj:
      * -------
      * add triangles from an obj file.
-     * 
+     *
      * @param filename: string the name of the obj file.
      */
     void addObj(const std::string &filename, const Transform &t=Transform());
@@ -352,7 +352,7 @@ private:
      * traceDistance:
      * --------------
      * traces a ray to get the distance to the intersection.
-     * 
+     *
      * @param ray : Ray the ray we are tracing.
      * @returns the distace to the intersection or -1 if no intersection occured.
      */
@@ -362,7 +362,7 @@ private:
      * touchar:
      * --------
      * converts a float to an unsigned char for saving to images.
-     * 
+     *
      * @param f: float the input float
      * @return f but as a unsigned char ranged between 0 and 255
      */
