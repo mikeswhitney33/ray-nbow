@@ -17,8 +17,8 @@ int main(int argc, char ** argv)
         return -1;
     }
 
-    RayTracingScene scene = RayTracingScene::FromScene(data_dir + "/scenes/basic.scene", data_dir);
-    float *pix = scene.getDistances(vec3{0, 0, -1}, {0, 0, 0}, {0, 1, 0});
+    rt::RayTracingScene scene = rt::RayTracingScene::FromScene(data_dir + "/scenes/basic.scene", data_dir);
+    float *pix = scene.getDistances({0, 0, -1}, {0, 0, 0}, {0, 1, 0});
     scene.savePPM("test.ppm", pix);
     delete [] pix;
 #ifdef __APPLE__
