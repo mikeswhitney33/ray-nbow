@@ -1,6 +1,6 @@
 #include "../ray-tracer/ray-tracer.hpp"
 #include <opencv2/opencv.hpp>
-
+#include "timer.h"
 #include <string>
 
 int main(int argc, char ** argv)
@@ -11,11 +11,15 @@ int main(int argc, char ** argv)
 		return -1;
 	}
 	rt::RayTracingScene scene = rt::RayTracingScene::FromScene(argv[1]);
-	scene.setVerbosity(true);
 	
 	std::cout << "Tracing " << scene.size() << " shapes" << std::endl;
-	float *pix = scene.getDistances({0, 0, -1}, {0, 0, 0}, {0, 1, 0});
-
+	Timer timer;
+	timer.reset();
+	float *pix = scene.getDistances({0, 0, -1}, {0, 0, 0}, {0, 1, 0}, [&](int k, int total)
+	{
+		std::cout << k << "/" << total << " -- " << timer << std::endl;
+	});
+	std::cout << timer << std::endl;
 	int size = scene.getDims();
 	pix = rt::normalize(pix, size);
 	unsigned char *data = rt::touchar(pix, size);

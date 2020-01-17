@@ -10,6 +10,8 @@
 #include <vector>
 #include <fstream>
 #include <algorithm>
+#include <functional>
+
 
 namespace rt
 {
@@ -57,7 +59,7 @@ namespace rt
          * @return the distances from camera to scene geometry.
          * NOTE: the values from this function are dynamically allocated and need to be cleaned up by the caller.
          */
-        float *getDistances(const vec3 &eye=DEFAULT_EYE, const vec3 &center=DEFAULT_CENTER, const vec3 &up=DEFAULT_UP) const;
+        float *getDistances(const vec3 &eye=DEFAULT_EYE, const vec3 &center=DEFAULT_CENTER, const vec3 &up=DEFAULT_UP, std::function<void(int, int)> callback=[](int,int){}) const;
 
         /**
          * getDistances:
@@ -68,7 +70,7 @@ namespace rt
          * @return the distances from camera to scene geometry.
          * NOTE: the values from this function are dynamically allocated and need to be cleaned up by the caller.
          */
-        float *getDistances(const mat4 &camera) const;
+        float *getDistances(const mat4 &camera, std::function<void(int, int)> callback=[](int,int){}) const;
 
         /**
          * addShape:
@@ -99,12 +101,6 @@ namespace rt
         void setVerbosity(const bool &v);
 
         static RayTracingScene FromScene(const std::string &filename);
-    private:
-        int width, height;
-        float w, h, fov, scale, aspect;
-        std::vector<Shape *> shapes;
-        // OctreeNode octree;
-        bool verbosity;
 
         /**
          * traceDistance:
@@ -115,6 +111,15 @@ namespace rt
          * @returns the distace to the intersection or -1 if no intersection occured.
          */
         float traceDistance(const Ray &ray) const;
+    private:
+        int width, height;
+        float w, h, fov, scale, aspect;
+        ShapeContainer *shapes;
+        // std::vector<Shape *> shapes;
+        // OctreeNode octree;
+        bool verbosity;
+
+        
     };
 
 }; // namespace

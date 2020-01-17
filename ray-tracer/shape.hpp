@@ -112,6 +112,35 @@ namespace rt
         Shape *shape;
     };
 
+    class ShapeContainer
+    {
+    public:
+        virtual bool intersect(const Ray &ray, float &t) const = 0;
+        virtual void addShape(Shape * shape) = 0;
+        virtual size_t size() const = 0;
+    };
+
+    class LinearContainer: public ShapeContainer
+    {
+    public:
+        virtual bool intersect(const Ray &ray, float &t) const;
+        virtual void addShape(Shape *shape);
+        virtual size_t size() const;
+    private:
+        std::vector<Shape*>shapes;
+    };
+
+    class MassBoxContainer: public ShapeContainer
+    {
+    public:
+        virtual bool intersect(const Ray &ray, float &t) const;
+        virtual void addShape(Shape *shape);
+        virtual size_t size() const;
+    private:
+        vec3 bounds[2];
+        LinearContainer shapes;
+    };
+
 
     struct OctreeNode
     {

@@ -1,4 +1,2 @@
-add_executable(trace-scene trace-scene.cpp)
-
-target_link_libraries(trace-scene ray-tracer ${OpenCV_LIBS})
-target_include_directories(trace-scene PUBLIC ${OpenCV_INCLUDE_DIRS})
+add_executable(trace-scene trace-scene.cpp timer.cpp rtrandom.cpp)
+add_executable(random random_testing timer.cpp rtrandom.cpp)

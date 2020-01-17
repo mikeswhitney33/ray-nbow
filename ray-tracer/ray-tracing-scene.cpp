@@ -3,6 +3,9 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
+#include <queue>
+#include <thread>
+
 constexpr float MAX_FLOAT = std::numeric_limits<float>::max();
 
 namespace rt
@@ -19,39 +22,63 @@ namespace rt
     {}
 
     RayTracingScene::RayTracingScene(const int &width, const int &height, const float &fov):width(width), height(height),w(width), h(height), fov(fov), scale(tanf(fov * M_PI / 180.0f * 0.5f)), aspect(w/h), verbosity(false)
-    //, octree({-MAX_FLOAT, -MAX_FLOAT, -MAX_FLOAT}, {MAX_FLOAT, MAX_FLOAT, MAX_FLOAT}, 0)
-    {}
-
-    float *RayTracingScene::getDistances(const vec3 &eye, const vec3 &center, const vec3 &up) const
     {
-        mat4 camera = lookAt(eye, center, up);
-        return getDistances(camera);
+        shapes = new MassBoxContainer();
+        // shapes = new LinearContainer();
     }
 
-    float *RayTracingScene::getDistances(const mat4 &camera) const
+    float *RayTracingScene::getDistances(const vec3 &eye, const vec3 &center, const vec3 &up, std::function<void(int, int)> callback) const
     {
-        float *pix = new float[width * height];
+        mat4 camera = lookAt(eye, center, up);
+        return getDistances(camera, callback);
+    }
+
+    void getDistSingle(const RayTracingScene * self, float *pix, const int &k, const Ray &ray)
+    {
+        pix[k] = self->traceDistance(ray);
+    }
+
+    float *RayTracingScene::getDistances(const mat4 &camera, std::function<void(int, int)> callback) const
+    {
+        int total = width * height;
+        float *pix = new float[total];
         int k = 0;
         vec3 orig = transformPt(camera, {0, 0, 0});
+
+        size_t max_threads = 100;
+        std::queue<std::thread> threads;
         for(int j = 0;j < height;j++)
         {
             if(verbosity) std::cout << j << "/" << height << std::endl;
             for(int i = 0;i < width;i++)
             {
+                while(threads.size() >= max_threads)
+                {
+                    threads.front().join();
+                    threads.pop();
+                }
+
                 float x = (2.0f * (i + 0.5f) / w - 1.0f) * scale * aspect;
                 float y = (1.0f - 2.0f * (j + 0.5f) / h) * scale;
                 vec3 dir = transformDir(camera, {x, y, 1});
-                float c = traceDistance(Ray(orig, norm(dir)));
-                pix[k++] = c;
+                Ray ray(orig, norm(dir));
+                threads.push(std::thread([&, k, ray]{getDistSingle(this, pix, k, ray);}));
+                k++;
             }
+            if(verbosity)
+                callback(j, height);
+        }
+        while(!threads.empty())
+        {
+            threads.front().join();
+            threads.pop();
         }
         return pix;
     }
 
     void RayTracingScene::addShape(Shape *s)
     {
-        // octree.addShape(new BoundingBox(s));
-        shapes.push_back(new BoundingBox(s));
+        shapes->addShape(new BoundingBox(s));
     }
 
     void RayTracingScene::addObj(const std::string &filename, const Transform &t)
@@ -92,7 +119,6 @@ namespace rt
                     tinyobj::real_t z = attrib.vertices[3 * idx.vertex_index + 2];
                     verts[v] = transformPt(m, {x, y, z});
                 }
-                // shapes.push_back(new BoundingBox(new Triangle(verts[0], verts[1], verts[2])));
                 addShape(new BoundingBox(new Triangle(verts[0], verts[1], verts[2])));
                 index_offset += fv;
             }
@@ -132,7 +158,7 @@ namespace rt
 
     size_t RayTracingScene::size() const
     {
-        return shapes.size();
+        return shapes->size();
     }
 
     void RayTracingScene::setVerbosity(const bool &v)
@@ -204,16 +230,7 @@ namespace rt
     float RayTracingScene::traceDistance(const Ray &ray) const
     {
         float t = std::numeric_limits<float>::max();
-        // bool hit = octree.intersect(ray, t);
-        bool hit = false;
-        for(auto s : shapes)
-        {
-            if(s->intersect(ray, t))
-            {
-                hit = true;
-            }
-        }
-        return hit ? t : -1;
+        return shapes->intersect(ray, t) ? t : -1;
     }
 
 }; // namespace

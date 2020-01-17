@@ -89,7 +89,9 @@ namespace rt
         emax = bounds[1];
     }
 
-    bool raybox(const Ray &ray, const vec3 bounds[2])
+
+
+    bool raybox(const Ray &ray, const vec3 bounds[2], float &t)
     {
         float tmin, tmax, tymin, tymax, tzmin, tzmax;
         tmin = (bounds[ray.sign[0]].x - ray.orig.x) * ray.invdir.x;
@@ -117,7 +119,82 @@ namespace rt
         {
             return false;
         }
+
+        if(tzmin > tmin)
+        {
+            tmin = tzmin;
+        }
+        if(tzmax < tmax)
+        {
+            tmax = tzmax;
+        }
+        float t0 = tmin;
+        if(t0 < 0)
+        {
+            t0 = tmax;
+            if(t0 < 0) return false;
+        }
+        if(t0 > t) return false;
+        t = t0;
         return true; 
+    }
+
+    bool raybox(const Ray &ray, const vec3 bounds[2])
+    {
+        float t = std::numeric_limits<float>::max();
+        return raybox(ray, bounds, t);   
+    }
+
+    bool LinearContainer::intersect(const Ray &ray, float &t) const
+    {
+        bool hit = false;
+        for(auto s : shapes)
+        {
+            if(s->intersect(ray, t))
+            {
+                hit = true;
+            }
+        }
+        return hit;
+    }
+    void LinearContainer::addShape(Shape *shape)
+    {
+        shapes.push_back(shape);
+    }
+    size_t LinearContainer::size() const 
+    {
+        return shapes.size();
+    }
+
+    bool MassBoxContainer::intersect(const Ray &ray, float &t) const
+    {
+        if(size() == 0) return false;
+        if(!raybox(ray, bounds, t)) return false;
+        t = std::numeric_limits<float>::max();
+        return shapes.intersect(ray, t);
+    }
+    void MassBoxContainer::addShape(Shape *shape)
+    {
+        if(size() == 0)
+        {
+            shape->extents(bounds[0], bounds[1]);
+        }
+        else
+        {
+            vec3 emin, emax;
+            shape->extents(emin, emax);
+            bounds[0].x = std::min(emin.x, bounds[0].x);
+            bounds[0].y = std::min(emin.y, bounds[0].y);
+            bounds[0].z = std::min(emin.z, bounds[0].z);
+            bounds[1].x = std::max(emax.x, bounds[1].x);
+            bounds[1].y = std::max(emax.y, bounds[1].y);
+            bounds[1].z = std::max(emax.z, bounds[1].z);
+        }
+        shapes.addShape(shape);
+    }
+    size_t MassBoxContainer::size() const
+    {
+        return shapes.size();
     }
 
     constexpr size_t OctreeNode::MAX_SIZE;
