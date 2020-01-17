@@ -44,34 +44,6 @@ namespace rt
         return pix;
     }
 
-    void RayTracingScene::savePPM(const std::string &filename, float *pix) const
-    {
-        int size = width * height;
-        float maxval = 0;
-        float minval = std::numeric_limits<float>::max();
-        for(int i = 0;i < size;i++)
-        {
-            if(pix[i] > maxval)
-            {
-                maxval = pix[i];
-            }
-            if(pix[i] >= 0 && pix[i] < minval)
-            {
-                minval = pix[i];
-            }
-        }
-        for(int i = 0;i < size;i++)
-        {
-            pix[i] = (pix[i] - minval) / (maxval - minval);
-        }
-        std::ofstream f(filename);
-        f << "P3\n" << width << " " << height << "\n255\n";
-        for(int i = 0;i < size;i++)
-        {
-            f << (int)touchar(pix[i]) << " " << (int)touchar(pix[i]) << " " << (int)touchar(pix[i]) << " ";
-        }
-    }
-
     void RayTracingScene::addShape(Shape *s)
     {
         shapes.push_back(s);
@@ -139,7 +111,25 @@ namespace rt
         scale = tanf(radians(fov));
     }
 
-    RayTracingScene RayTracingScene::FromScene(const std::string &filename, const std::string &data_dir)
+    int RayTracingScene::getWidth() const
+    {
+        return width;
+    }
+    int RayTracingScene::getHeight() const
+    {
+        return height;
+    }
+    int RayTracingScene::getDims() const
+    {
+        return width * height;
+    }
+
+    size_t RayTracingScene::size() const
+    {
+        return shapes.size();
+    }
+
+    RayTracingScene RayTracingScene::FromScene(const std::string &filename)
     {
         RayTracingScene scene;
         std::ifstream f(filename);
@@ -189,7 +179,7 @@ namespace rt
                 std::string path;
                 vec3 t, r, s;
                 f >> path >> t >> r >> s;
-                scene.addObj(data_dir + path, Transform(t, r, s));
+                scene.addObj(path, Transform(t, r, s));
             }
         }
         return scene;

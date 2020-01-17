@@ -4,7 +4,7 @@
 #include "vec3.hpp"
 #include "shape.hpp"
 #include "mat4.hpp"
-#include "basic-math.hpp"
+#include "utils.hpp"
 #include "transform.hpp"
 
 #include <vector>
@@ -71,16 +71,6 @@ namespace rt
         float *getDistances(const mat4 &camera) const;
 
         /**
-         * savePPM:
-         * --------
-         * saves the distances to a ppm file for visualization.
-         *
-         * @param filename: string the name of the output file.
-         * @param pix: float* the distances to save
-         */
-        void savePPM(const std::string &filename, float *pix) const;
-
-        /**
          * addShape:
          * ---------
          * adds a shape to the scene.
@@ -101,8 +91,12 @@ namespace rt
         void setWidth(const int &width);
         void setHeight(const int &height);
         void setFov(const float &fov);
+        int getWidth() const;
+        int getHeight() const;
+        int getDims() const;
+        size_t size() const;
 
-        static RayTracingScene FromScene(const std::string &filename, const std::string &data_dir);
+        static RayTracingScene FromScene(const std::string &filename);
     private:
         int width, height;
         float w, h, fov, scale, aspect;
@@ -121,4 +115,4 @@ namespace rt
 
 }; // namespace
 
-#endif 
+#endif

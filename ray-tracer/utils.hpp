@@ -1,7 +1,7 @@
-#ifndef __BASIC_MATH_HPP__
-#define __BASIC_MATH_HPP__
+#ifndef __UTILS_HPP__
+#define __UTILS_HPP__
 
-#include <cmath>
+#include <string>
 
 namespace rt
 {
@@ -9,7 +9,7 @@ namespace rt
      * radians:
      * --------
      * converts degress to radians
-     * 
+     *
      * @param deg: float the input degrees.
      * @return deg but in radians.
      */
@@ -24,6 +24,12 @@ namespace rt
      * @return f but as a unsigned char ranged between 0 and 255
      */
     unsigned char touchar(const float &f);
+
+    unsigned char *touchar(float *pix, const int &size);
+
+    float *normalize(float *pix, const int &size);
+
+    void toPPM(const std::string &filename, unsigned char *pix, const int &size);
 };
 
 
