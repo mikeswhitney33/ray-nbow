@@ -96,11 +96,15 @@ namespace rt
         int getDims() const;
         size_t size() const;
 
+        void setVerbosity(const bool &v);
+
         static RayTracingScene FromScene(const std::string &filename);
     private:
         int width, height;
         float w, h, fov, scale, aspect;
         std::vector<Shape *> shapes;
+        // OctreeNode octree;
+        bool verbosity;
 
         /**
          * traceDistance:

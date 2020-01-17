@@ -23,21 +23,8 @@ namespace rt
          */
         Ray(const vec3 &o, const vec3 &d);
 
-        /**
-         * orig:
-         * -----
-         * an accessor method for getting the origin.
-         */
-        vec3 orig() const;
-
-        /**
-         * dir:
-         * ----
-         * an accessor method for getting the direction.
-         */
-        vec3 dir() const;
-    private:
-        vec3 o, d;
+        vec3 orig, dir, invdir;
+        int sign[3];
     };
 
 }; // namespace

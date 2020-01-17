@@ -60,6 +60,7 @@ namespace rt
      * @return the elementwise division between a vec3 and a float
      */
     vec3 operator/(const vec3 &a, const float &f);
+    vec3 operator/(const float &f, const vec3 &a);
 
     /**
      * dot:
@@ -92,6 +93,9 @@ namespace rt
      * @return: the normalized version of a
      */
     vec3 norm(const vec3 &a);
+
+    float min(const vec3 &v);
+    float max(const vec3 &v);
 
 }; // namespace
 

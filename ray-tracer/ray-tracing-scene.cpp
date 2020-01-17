@@ -3,6 +3,8 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
+constexpr float MAX_FLOAT = std::numeric_limits<float>::max();
+
 namespace rt
 {
 
@@ -16,7 +18,8 @@ namespace rt
     RayTracingScene::RayTracingScene():RayTracingScene(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_FOV)
     {}
 
-    RayTracingScene::RayTracingScene(const int &width, const int &height, const float &fov):width(width), height(height),w(width), h(height), fov(fov), scale(tanf(fov * M_PI / 180.0f * 0.5f)), aspect(w/h)
+    RayTracingScene::RayTracingScene(const int &width, const int &height, const float &fov):width(width), height(height),w(width), h(height), fov(fov), scale(tanf(fov * M_PI / 180.0f * 0.5f)), aspect(w/h), verbosity(false)
+    //, octree({-MAX_FLOAT, -MAX_FLOAT, -MAX_FLOAT}, {MAX_FLOAT, MAX_FLOAT, MAX_FLOAT}, 0)
     {}
 
     float *RayTracingScene::getDistances(const vec3 &eye, const vec3 &center, const vec3 &up) const
@@ -32,6 +35,7 @@ namespace rt
         vec3 orig = transformPt(camera, {0, 0, 0});
         for(int j = 0;j < height;j++)
         {
+            if(verbosity) std::cout << j << "/" << height << std::endl;
             for(int i = 0;i < width;i++)
             {
                 float x = (2.0f * (i + 0.5f) / w - 1.0f) * scale * aspect;
@@ -46,7 +50,8 @@ namespace rt
 
     void RayTracingScene::addShape(Shape *s)
     {
-        shapes.push_back(s);
+        // octree.addShape(new BoundingBox(s));
+        shapes.push_back(new BoundingBox(s));
     }
 
     void RayTracingScene::addObj(const std::string &filename, const Transform &t)
@@ -87,7 +92,8 @@ namespace rt
                     tinyobj::real_t z = attrib.vertices[3 * idx.vertex_index + 2];
                     verts[v] = transformPt(m, {x, y, z});
                 }
-                shapes.push_back(new Triangle(verts[0], verts[1], verts[2]));
+                // shapes.push_back(new BoundingBox(new Triangle(verts[0], verts[1], verts[2])));
+                addShape(new BoundingBox(new Triangle(verts[0], verts[1], verts[2])));
                 index_offset += fv;
             }
         }
@@ -127,6 +133,11 @@ namespace rt
     size_t RayTracingScene::size() const
     {
         return shapes.size();
+    }
+
+    void RayTracingScene::setVerbosity(const bool &v)
+    {
+        verbosity = v;
     }
 
     RayTracingScene RayTracingScene::FromScene(const std::string &filename)
@@ -182,12 +193,18 @@ namespace rt
                 scene.addObj(path, Transform(t, r, s));
             }
         }
+
+        std::cout << filename << std::endl;
+        std::cout << "[w x h]: " << "[" << scene.width << " x " << scene.height << "]" << std::endl;
+        std::cout << "fov: " << scene.fov << std::endl;
+        std::cout << "Number of shapes: " << scene.size() << std::endl;
         return scene;
     }
 
     float RayTracingScene::traceDistance(const Ray &ray) const
     {
         float t = std::numeric_limits<float>::max();
+        // bool hit = octree.intersect(ray, t);
         bool hit = false;
         for(auto s : shapes)
         {

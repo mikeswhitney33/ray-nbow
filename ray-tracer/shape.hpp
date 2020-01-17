@@ -5,6 +5,7 @@
 #include "ray.hpp"
 
 #include <cmath>
+#include <vector>
 
 namespace rt
 {
@@ -26,6 +27,7 @@ namespace rt
          * @return true if hit, false otherwise.
          */
         virtual bool intersect(const Ray &ray, float &t) const = 0;
+        virtual void extents(vec3 &emin, vec3 &emax) const = 0;
     };
 
     /**
@@ -57,6 +59,7 @@ namespace rt
          * @return true if hit, false otherwise.
          */
         virtual bool intersect(const Ray &ray, float &t) const;
+        virtual void extents(vec3 &emin, vec3 &emax) const;
     private:
         vec3 a, b, c;
     };
@@ -89,9 +92,41 @@ namespace rt
          * @return true if hit, false otherwise.
          */
         virtual bool intersect(const Ray &ray, float &t) const;
+        virtual void extents(vec3 &emin, vec3 &emax) const;
     private:
         vec3 center;
-        float radius2;
+        float radius, radius2;
+    };
+
+    bool raybox(const Ray &ray, const vec3 bounds[2]);
+    bool boxbox(const vec3 bounds1[2], const vec3 bounds2[2]);
+
+    class BoundingBox: public Shape
+    {
+    public:
+        BoundingBox(Shape *s);
+        virtual bool intersect(const Ray &ray, float &t) const;
+        virtual void extents(vec3 &emin, vec3 &emax) const;
+    private:
+        vec3 bounds[2];
+        Shape *shape;
+    };
+
+
+    struct OctreeNode
+    {
+        static constexpr size_t MAX_SIZE = 5;
+        static constexpr size_t MAX_DEPTH = 8;
+        vec3 center;
+        std::vector<Shape*> content;
+        std::vector<OctreeNode> children;
+        vec3 bounds[2];
+        size_t depth;
+        OctreeNode(const vec3 &emin, const vec3 &emax, size_t depth);
+        void split();
+        void addShape(Shape *shape);
+        bool intersect(const Ray &ray, float &t) const;
+        bool intersect(Shape *shape) const;
     };
 
 }; // namespace

@@ -29,6 +29,10 @@ namespace rt
     {
         return {a.x / f, a.y / f, a.z / f};
     }
+    vec3 operator/(const float &f, const vec3 &a)
+    {
+        return {f / a.x, f / a.y, f / a.z};   
+    }
     float dot(const vec3 &a, const vec3 &b)
     {
         return a.x * b.x + a.y * b.y + a.z * b.z;
@@ -45,5 +49,15 @@ namespace rt
     vec3 norm(const vec3 &a)
     {
         return a / sqrtf(dot(a, a));
+    }
+
+    float min(const vec3 &v)
+    {
+        return v.x < v.y && v.x < v.z ? v.x : v.y < v.z ? v.y : v.z;
+    }
+
+    float max(const vec3 &v)
+    {
+        return v.x > v.y && v.x > v.z ? v.x : v.y > v.z ? v.y : v.z;
     }
 };

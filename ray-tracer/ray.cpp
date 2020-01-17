@@ -2,25 +2,10 @@
 
 namespace rt
 {
-    Ray::Ray(const vec3 &o, const vec3 &d):o(o),d(d)
-    {}
-    /**
-     * orig:
-     * -----
-     * an accessor method for getting the origin.
-     */
-    vec3 Ray::orig() const
+    Ray::Ray(const vec3 &o, const vec3 &d):orig(o),dir(d),invdir(1/d)
     {
-        return o;
-    }
-
-    /**
-     * dir:
-     * ----
-     * an accessor method for getting the direction.
-     */
-    vec3 Ray::dir() const
-    {
-        return d;
+        sign[0] = d.x < 0;
+        sign[1] = d.y < 0;
+        sign[2] = d.z < 0;
     }
 };

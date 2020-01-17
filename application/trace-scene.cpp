@@ -11,7 +11,8 @@ int main(int argc, char ** argv)
 		return -1;
 	}
 	rt::RayTracingScene scene = rt::RayTracingScene::FromScene(argv[1]);
-
+	scene.setVerbosity(true);
+	
 	std::cout << "Tracing " << scene.size() << " shapes" << std::endl;
 	float *pix = scene.getDistances({0, 0, -1}, {0, 0, 0}, {0, 1, 0});
 
