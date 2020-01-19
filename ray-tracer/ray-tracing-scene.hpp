@@ -53,24 +53,11 @@ namespace rt
          * -------------
          * retrieve the distances from a camera to the scene geometry.
          *
-         * @param eye: vec3 the position of the camera.
-         * @param center: vec3 the position the camera is looking at.
-         * @param up: vec3 a general up vector for the camera.
-         * @return the distances from camera to scene geometry.
-         * NOTE: the values from this function are dynamically allocated and need to be cleaned up by the caller.
-         */
-        float *getDistances(const vec3 &eye=DEFAULT_EYE, const vec3 &center=DEFAULT_CENTER, const vec3 &up=DEFAULT_UP, std::function<void(int, int)> callback=[](int,int){}) const;
-
-        /**
-         * getDistances:
-         * -------------
-         * retrieve the distances from a camera to the scene geometry.
-         *
          * @param camera: mat4 the camera matrix
          * @return the distances from camera to scene geometry.
          * NOTE: the values from this function are dynamically allocated and need to be cleaned up by the caller.
          */
-        float *getDistances(const mat4 &camera, std::function<void(int, int)> callback=[](int,int){}) const;
+        float *getDistances(std::function<void(int, int)> callback=[](int,int){}) const;
 
         /**
          * addShape:
@@ -93,6 +80,9 @@ namespace rt
         void setWidth(const int &width);
         void setHeight(const int &height);
         void setFov(const float &fov);
+        void setEye(const vec3 &v);
+        void setCenter(const vec3 &v);
+        void setUp(const vec3 &v);
         int getWidth() const;
         int getHeight() const;
         int getDims() const;
@@ -114,6 +104,7 @@ namespace rt
     private:
         int width, height;
         float w, h, fov, scale, aspect;
+        vec3 eye, center, up;
         ShapeContainer *shapes;
         // std::vector<Shape *> shapes;
         // OctreeNode octree;

@@ -18,13 +18,13 @@ namespace rt
         return (f < 0 ? 0 : f > 1 ? 1 : f) * 255.0f;
     }
 
-    float *normalize(float *pix, const int &size)
+    float *normalize(float *pix, const int &size, bool invert)
     {
     	float minval = std::numeric_limits<float>::max(), maxval = 0;
     	for(int i = 0;i < size;i++)
     	{
     		float p = pix[i];
-    		if(p >= 0 && p < minval)
+    		if(p > 0 && p < minval)
     		{
     			minval = p;
     		}
@@ -35,9 +35,18 @@ namespace rt
     	}
     	for(int i =0;i < size;i++)
     	{
-    		pix[i] = (pix[i] - minval) / (maxval - minval);
+            if(pix[i] != 0)
+            {
+                if(invert)
+                {
+                    pix[i] = 1 - ((pix[i] - minval) / (maxval - minval)); 
+                }
+                else
+                {
+                    pix[i] = ((pix[i] - minval) / (maxval - minval));
+                }
+            }
     	}
-    	std::cout << "Normalized (min,max): (" << minval << "," << maxval << ")" << std::endl;
     	return pix;
     }
 

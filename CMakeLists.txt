@@ -20,6 +20,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 add_subdirectory(ray-tracer)
 
 link_libraries(ray-tracer)
+
 add_subdirectory(application)
 
 file(COPY resources DESTINATION ${CMAKE_BINARY_DIR}/)

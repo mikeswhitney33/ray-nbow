@@ -18,4 +18,6 @@ add_library(
     transform.cpp
     vec3.cpp
 
+    ray-tracer.cpp
+
     )

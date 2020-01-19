@@ -10,25 +10,15 @@ int main(int argc, char ** argv)
 		std::cerr << "Usage: " << argv[0] << " <scene filename>" << std::endl;
 		return -1;
 	}
-	rt::RayTracingScene scene = rt::RayTracingScene::FromScene(argv[1]);
-	
-	std::cout << "Tracing " << scene.size() << " shapes" << std::endl;
+	std::string filename(argv[1]);
+
 	Timer timer;
-	timer.reset();
-	float *pix = scene.getDistances({0, 0, -1}, {0, 0, 0}, {0, 1, 0}, [&](int k, int total)
-	{
-		std::cout << k << "/" << total << " -- " << timer << std::endl;
-	});
-	std::cout << timer << std::endl;
-	int size = scene.getDims();
-	pix = rt::normalize(pix, size);
-	unsigned char *data = rt::touchar(pix, size);
-	cv::Mat im(scene.getHeight(), scene.getWidth(), CV_8UC1, data);
-
-	cv::imshow("im", im);
+	cv::Mat im = trace_scene(filename, true);
+	std::cout << "Traced in: " << timer << std::endl;
+	
+	cv::Mat display;
+	im.convertTo(display, CV_8UC1, 255);
+	cv::imshow("display", display);
 	cv::waitKey(0);
-
-	delete [] pix;
-	delete [] data;
 	return 0;
 }

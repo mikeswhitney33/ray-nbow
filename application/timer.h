@@ -7,6 +7,7 @@
 class Timer
 {
 public:
+    Timer();
     void reset();
     friend std::ostream &operator<<(std::ostream &os, const Timer &timer);
 private:

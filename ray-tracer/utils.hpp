@@ -27,7 +27,7 @@ namespace rt
 
     unsigned char *touchar(float *pix, const int &size);
 
-    float *normalize(float *pix, const int &size);
+    float *normalize(float *pix, const int &size, bool invert=false);
 
     void toPPM(const std::string &filename, unsigned char *pix, const int &size);
 };

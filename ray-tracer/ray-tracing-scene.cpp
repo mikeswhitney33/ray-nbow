@@ -21,57 +21,39 @@ namespace rt
     RayTracingScene::RayTracingScene():RayTracingScene(DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_FOV)
     {}
 
-    RayTracingScene::RayTracingScene(const int &width, const int &height, const float &fov):width(width), height(height),w(width), h(height), fov(fov), scale(tanf(fov * M_PI / 180.0f * 0.5f)), aspect(w/h), verbosity(false)
+    RayTracingScene::RayTracingScene(const int &width, const int &height, const float &fov):width(width), height(height),w(width), h(height), fov(fov), scale(tanf(fov * M_PI / 180.0f * 0.5f)), aspect(w/h), eye(DEFAULT_EYE), center(DEFAULT_CENTER), up(DEFAULT_UP), verbosity(false)
     {
         shapes = new MassBoxContainer();
-        // shapes = new LinearContainer();
     }
 
-    float *RayTracingScene::getDistances(const vec3 &eye, const vec3 &center, const vec3 &up, std::function<void(int, int)> callback) const
-    {
-        mat4 camera = lookAt(eye, center, up);
-        return getDistances(camera, callback);
-    }
 
     void getDistSingle(const RayTracingScene * self, float *pix, const int &k, const Ray &ray)
     {
         pix[k] = self->traceDistance(ray);
     }
 
-    float *RayTracingScene::getDistances(const mat4 &camera, std::function<void(int, int)> callback) const
+    float *RayTracingScene::getDistances(std::function<void(int, int)> callback) const
     {
+        mat4 camera = lookAt(eye, center, up);
         int total = width * height;
         float *pix = new float[total];
         int k = 0;
         vec3 orig = transformPt(camera, {0, 0, 0});
 
-        size_t max_threads = 100;
-        std::queue<std::thread> threads;
         for(int j = 0;j < height;j++)
         {
             if(verbosity) std::cout << j << "/" << height << std::endl;
             for(int i = 0;i < width;i++)
             {
-                while(threads.size() >= max_threads)
-                {
-                    threads.front().join();
-                    threads.pop();
-                }
-
                 float x = (2.0f * (i + 0.5f) / w - 1.0f) * scale * aspect;
                 float y = (1.0f - 2.0f * (j + 0.5f) / h) * scale;
                 vec3 dir = transformDir(camera, {x, y, 1});
                 Ray ray(orig, norm(dir));
-                threads.push(std::thread([&, k, ray]{getDistSingle(this, pix, k, ray);}));
+                getDistSingle(this, pix, k, ray);
                 k++;
             }
             if(verbosity)
                 callback(j, height);
-        }
-        while(!threads.empty())
-        {
-            threads.front().join();
-            threads.pop();
         }
         return pix;
     }
@@ -166,6 +148,21 @@ namespace rt
         verbosity = v;
     }
 
+    void RayTracingScene::setEye(const vec3 &v)
+    {
+        eye = v;
+    }
+
+    void RayTracingScene::setCenter(const vec3 &v)
+    {
+        center = v;
+    }
+
+    void RayTracingScene::setUp(const vec3 &v)
+    {
+        up = v;
+    }
+
     RayTracingScene RayTracingScene::FromScene(const std::string &filename)
     {
         RayTracingScene scene;
@@ -218,6 +215,32 @@ namespace rt
                 f >> path >> t >> r >> s;
                 scene.addObj(path, Transform(t, r, s));
             }
+            else if(label == "eye")
+            {
+                vec3 eye;
+                f >> eye;
+                scene.setEye(eye);
+            }
+            else if(label == "center")
+            {
+                vec3 center;
+                f >> center;
+                scene.setCenter(center);
+            }
+            else if(label == "up")
+            {
+                vec3 up;
+                f >> up;
+                scene.setUp(up);
+            }
+            else if(label == "camera")
+            {
+                vec3 eye, center, up;
+                f >> eye >> center >> up;
+                scene.setEye(eye);
+                scene.setCenter(center);
+                scene.setUp(up);
+            }
         }
 
         std::cout << filename << std::endl;
@@ -230,7 +253,7 @@ namespace rt
     float RayTracingScene::traceDistance(const Ray &ray) const
     {
         float t = std::numeric_limits<float>::max();
-        return shapes->intersect(ray, t) ? t : -1;
+        return shapes->intersect(ray, t) ? t : 0;
     }
 
 }; // namespace
