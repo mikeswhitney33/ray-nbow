@@ -11,3 +11,4 @@ CTestTestfile.cmake
 _deps
 build
 python/data
+python/happiness_data
