@@ -1,7 +1,7 @@
 #include "ray-tracing-scene.hpp"
 
 #define TINYOBJLOADER_IMPLEMENTATION
-#include "tiny_obj_loader.h"
+#include "../include/tiny_obj_loader.h"
 
 #include <queue>
 #include <thread>

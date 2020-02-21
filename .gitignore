@@ -12,3 +12,6 @@ _deps
 build
 python/data
 python/happiness_data
+.vscode
+env
+.pylintrc

@@ -22,5 +22,6 @@ add_subdirectory(ray-tracer)
 link_libraries(ray-tracer)
 
 add_subdirectory(application)
+add_subdirectory(mat-tracer)
 
 file(COPY resources DESTINATION ${CMAKE_BINARY_DIR}/)
