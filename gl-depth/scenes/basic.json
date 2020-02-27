@@ -1,0 +1,14 @@
+{
+    "ambient":[0.7, 0.7, 0.7],
+    "background":[0.2, 0.3, 0.3],
+    "eye":[0, 0, -3],
+    "center":[0, 0, 0],
+    "shapes":[
+        {"type":"sphere", "matid":1, "center":[0, 1, 0], "rad":0.1},
+        {"type":"obj", "matid":0,"filename":"../resources/objs/cube.obj"}
+    ],
+    "materials":[
+        {"type":"MAT_TYPE_DIFF", "ka":[0.2, 0.2, 0.2], "kd":[0.25, 0.25, 0.75], "ks":[1,1,1],"alpha":32},
+        {"type":"MAT_TYPE_LIGHT", "ka":[1,1,1],"kd":[1,1,1],"ks":[1,1,1],"alpha":32}
+    ]
+}
