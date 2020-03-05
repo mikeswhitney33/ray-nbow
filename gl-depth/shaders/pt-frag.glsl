@@ -198,42 +198,60 @@ bool intersect(vec3 orig, vec3 dir, inout int id, inout float t) {
     return id > -1;
 }
 
-vec3 trace(vec3 orig, vec3 dir) {
-    int id;
-    float t;
-    if(!intersect(orig, dir, id, t)) {
-        return background;
+vec3 getRefrDir(vec3 I, vec3 N, float eta1, float eta2, inout float eps) {
+    float cosI = dot(I, N);
+    float n = cosI > 0 ? eta2 / eta1 : eta1 / eta2;
+    cosI = -cosI;
+    float sinT2 = n * n * (1.0 - cosI * cosI);
+    if(sinT2 > 1.0) {
+        eps = 0.0000001;
+        return reflect(I, N);
     }
-    Shape shape = shapes[id];
-    vec3 pt = orig + dir * t;
-    vec3 N = getNormal(shape, pt, dir);
-
-    if(shape.mat.matType == MAT_TYPE_LIGHT) {
-        return shape.mat.kd;
+    else {
+        eps = -0.0000001;
+        float cosT = sqrt(1.0 - sinT2);
+        return n * I + (n * cosI - cosT) * -N;
     }
-    else if(shape.mat.matType == MAT_TYPE_DIFF) {
-        vec3 color = ambient * shape.mat.ka;
-        vec3 V = normalize(-dir);
-        for(int i = 0;i < NUM_SHAPES;i++) {
-            if(i == id || shapes[i].mat.matType != MAT_TYPE_LIGHT) {
-                continue;
-            }
-            vec3 L = -getShapeDirection(shapes[i], pt);
-            int _id;
-            float _t;
-            if(intersect(pt + N * 0.0000001, -L, _id, _t) && _id != i) {
-                continue;
-            }
-
-            vec3 R = reflect(L, N);
-
-            vec3 diff = shape.mat.kd * max(dot(L, N), 0) * shapes[i].mat.kd;
-            vec3 spec = shape.mat.ks * pow(max(dot(R, V), 0), shape.mat.alpha) * shapes[i].mat.ks;
-            color += diff + spec;
-        }
-        return color;
-    };
 }
+
+
+{%% trace %%}
+// vec3 trace(vec3 orig, vec3 dir) {
+//     int id;
+//     float t;
+//     if(!intersect(orig, dir, id, t)) {
+//         return background;
+//     }
+//     Shape shape = shapes[id];
+//     vec3 pt = orig + dir * t;
+//     vec3 N = getNormal(shape, pt, dir);
+
+//     if(shape.mat.matType == MAT_TYPE_LIGHT) {
+//         return shape.mat.kd;
+//     }
+//     else if(shape.mat.matType == MAT_TYPE_DIFF) {
+//         vec3 color = ambient * shape.mat.ka;
+//         vec3 V = normalize(-dir);
+//         for(int i = 0;i < NUM_SHAPES;i++) {
+//             if(i == id || shapes[i].mat.matType != MAT_TYPE_LIGHT) {
+//                 continue;
+//             }
+//             vec3 L = -getShapeDirection(shapes[i], pt);
+//             int _id;
+//             float _t;
+//             if(intersect(pt + N * 0.0000001, -L, _id, _t) && _id != i) {
+//                 continue;
+//             }
+
+//             vec3 R = reflect(L, N);
+
+//             vec3 diff = shape.mat.kd * max(dot(L, N), 0) * shapes[i].mat.kd;
+//             vec3 spec = shape.mat.ks * pow(max(dot(R, V), 0), shape.mat.alpha) * shapes[i].mat.ks;
+//             color += diff + spec;
+//         }
+//         return color;
+//     };
+// }
 
 void main() {
     initShapes();

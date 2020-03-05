@@ -61,7 +61,7 @@ def calc_gp(device, disc_net, real_data, fake_data, lam):
     return gradient_penalty
 
 
-def train(device, gen_model, disc_model, real_dataset_path, fake_dataset_path, epochs):
+def train(device, gen_model, disc_model, real_dataset_path, epochs):
     """trains a gan"""
     train_transform = tv.transforms.Compose([
         tv.transforms.Resize((224, 224)),
@@ -71,19 +71,10 @@ def train(device, gen_model, disc_model, real_dataset_path, fake_dataset_path, e
         tv.transforms.Normalize((0.5,), (0.5,))
     ])
 
-    fakedataset = GrayDataset(fake_dataset_path, transform=train_transform)
-    fakeloader = torch.utils.data.DataLoader(
-        fakedataset,
-        batch_size=min(16, len(fakedataset)),
-        shuffle=True,
-        num_workers=cpu_count(),
-        drop_last=True)
-    fakeiter = iter(fakeloader)
-
     realdataset = ColorDataset(real_dataset_path, transform=train_transform)
     realloader = torch.utils.data.DataLoader(
         realdataset,
-        batch_size=min(16, len(fakedataset)),
+        batch_size=20,
         shuffle=True,
         num_workers=cpu_count(),
         drop_last=True)
@@ -120,7 +111,8 @@ def train(device, gen_model, disc_model, real_dataset_path, fake_dataset_path, e
             real_cost = torch.mean(disc_real)
             real_cost.backward(mone)
 
-            fake_data, fakeiter = try_iter(fakeiter, fakeloader)
+            # fake_data, fakeiter = try_iter(fakeiter, fakeloader)
+            fake_data = torch.randn(real_data.shape[0], 1, 224, 224)
             fake_data = fake_data.to(device)
             disc_fake = discriminator(generator(fake_data))
             fake_cost = torch.mean(disc_fake)
@@ -134,7 +126,8 @@ def train(device, gen_model, disc_model, real_dataset_path, fake_dataset_path, e
             param.requires_grad = False
         gen_optimizer.zero_grad()
 
-        fake_data, fakeiter = try_iter(fakeiter, fakeloader)
+        # fake_data, fakeiter = try_iter(fakeiter, fakeloader)
+        fake_data = torch.randn(real_data.shape[0], 1, 224, 224)
         fake_data = fake_data.to(device)
         disc_g = discriminator(generator(fake_data)).mean()
         disc_g.backward(mone)
@@ -195,7 +188,6 @@ def main():
             args.gen_model,
             args.disc_model,
             args.real_dataset_path,
-            args.fake_dataset_path,
             args.epochs)
 
 

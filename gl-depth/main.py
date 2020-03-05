@@ -72,9 +72,9 @@ def lookat(eye, center, up):
     side = normalize(np.cross(forward, up))
     upward = normalize(np.cross(side, forward))
     return np.array([
-        [-side[0], upward[0], -forward[0], 0],
-        [-side[1], upward[1], -forward[1], 0],
-        [-side[2], upward[2], -forward[2], 0],
+        [-side[0], upward[0], forward[0], 0],
+        [-side[1], upward[1], forward[1], 0],
+        [-side[2], upward[2], forward[2], 0],
         [-np.dot(eye, side), -np.dot(eye, upward), np.dot(eye, forward), 1]])
 
 def perspective(fov, aspect, z_near, z_far):
@@ -111,6 +111,97 @@ def shape2str(idx, shape):
 def shapes2str(shapes):
     return ''.join([shape2str(i, shape) for i, shape in enumerate(shapes)])
 
+
+def trace2str(depth):
+    if depth == 0:
+        return """
+vec3 trace0(vec3 orig, vec3 dir) {
+    int id;
+    float t;
+    if(!intersect(orig, dir, id, t)) {
+        return background;
+    }
+    Shape shape = shapes[id];
+    vec3 pt = orig + dir * t;
+    vec3 N = getNormal(shape, pt, dir);
+
+    if(shape.mat.matType == MAT_TYPE_LIGHT) {
+        return shape.mat.kd;
+    }
+    vec3 color = ambient * shape.mat.ka;
+    vec3 V = normalize(-dir);
+    for(int i = 0;i < NUM_SHAPES;i++) {
+        if(i == id || shapes[i].mat.matType != MAT_TYPE_LIGHT) {
+            continue;
+        }
+        vec3 L = -getShapeDirection(shapes[i], pt);
+        int _id;
+        float _t;
+        if(intersect(pt + N * 0.0000001, -L, _id, _t) && _id != i) {
+            continue;
+        }
+
+        vec3 R = reflect(L, N);
+
+        vec3 diff = shape.mat.kd * max(dot(L, N), 0) * shapes[i].mat.kd;
+        vec3 spec = shape.mat.ks * pow(max(dot(R, V), 0), shape.mat.alpha) * shapes[i].mat.ks;
+        color += diff + spec;
+    }
+    return color;
+}
+"""
+    else:
+        return f"""
+vec3 trace{depth}(vec3 orig, vec3 dir) {{
+    int id;
+    float t;
+    if(!intersect(orig, dir, id, t)) {{
+        return background;
+    }}
+    Shape shape = shapes[id];
+    vec3 pt = orig + dir * t;
+    vec3 N = getNormal(shape, pt, dir);
+
+    if(shape.mat.matType == MAT_TYPE_LIGHT) {{
+        return shape.mat.kd;
+    }}
+
+    vec3 kd = shapes[id].mat.kd;
+    if(shape.mat.matType == MAT_TYPE_SPEC) {{
+        vec3 reflOrig = pt + N * 0.0000001;
+        vec3 newDir = reflect(dir, N);
+        kd = trace{depth-1}(reflOrig, newDir);
+    }}
+    else if(shape.mat.matType == MAT_TYPE_REFR) {{
+        float eps;
+        vec3 newDir = getRefrDir(dir, N, 1, 1.03, eps);
+        vec3 refrOrig = pt + N * eps;
+
+        kd = trace{depth-1}(refrOrig, newDir);
+    }}
+    vec3 color = ambient * shape.mat.ka;
+    vec3 V = normalize(-dir);
+    for(int i = 0;i < NUM_SHAPES;i++) {{
+        if(i == id || shapes[i].mat.matType != MAT_TYPE_LIGHT) {{
+            continue;
+        }}
+        vec3 L = -getShapeDirection(shapes[i], pt);
+        int _id;
+        float _t;
+        if(intersect(pt + N * 0.0000001, -L, _id, _t) && _id != i) {{
+            continue;
+        }}
+
+        vec3 R = reflect(L, N);
+
+        vec3 diff = kd * max(dot(L, N), 0) * shapes[i].mat.kd;
+        vec3 spec = shape.mat.ks * pow(max(dot(R, V), 0), shape.mat.alpha) * shapes[i].mat.ks;
+        color += diff + spec;
+    }}
+    return color;
+}}
+"""
+
 def main():
     """The entry point to the program"""
     ctx = moderngl.create_standalone_context()
@@ -130,6 +221,14 @@ void initShapes() {{
     {shapes2str(scene_data['shapes'])}
 }}
     """)
+
+    depth = 5
+    frag_code = frag_code.replace("{%% trace %%}", f"""
+{''.join([trace2str(d) for d in range(depth)])}
+vec3 trace(vec3 eye, vec3 dir) {{
+    return trace{depth-1}(eye, dir);
+}}
+""")
     width = scene_data['width']
     height = scene_data['height']
 
@@ -155,9 +254,7 @@ void initShapes() {{
     fbo.clear(0.2, 0.3, 0.3, 1.0)
     vao.render(moderngl.TRIANGLE_FAN)
 
-    image = Image.frombytes('RGB', fbo.size, fbo.read(), 'raw', 'RGB', 0, -1).show()
-    npimage = np.array(image)
-    print(npimage.shape, npimage.min(), npimage.max())
+    Image.frombytes('RGB', fbo.size, fbo.read(), 'raw', 'RGB', 0, -1).show()
 
 if __name__ == "__main__":
     main()
