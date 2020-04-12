@@ -1,3 +1,6 @@
 env
 .pylintrc
 __pycache__
+tmp
+
+*.pyc

@@ -1,0 +1,6 @@
+#!/bin/bash
+
+DIR_NAME="`dirname "$0"`"
+mkdir -p ${DIR_NAME}/out
+
+blender ${DIR_NAME}/dragon_bunny.blend -b -P ${DIR_NAME}/random_mats.py -o ${DIR_NAME}/out/test -f 0 -- --image ${DIR_NAME}/starry.png
